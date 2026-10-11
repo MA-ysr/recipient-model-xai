@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rm="http://recipientmodel/1.1">
+  <rm:Recipient id="ec1-coldstart">
+    <profile/>
+    <contexts startedAt="2026-03-12T08:00:00.000+0000">
+      <requests label="cold-start-request">
+        <factors xsi:type="rm:ExplanationPurpose" name="purpose" kind="contest"/>
+        <factors xsi:type="rm:Stakes" name="stakes" level="high"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+  <rm:Recipient id="ec2-tie">
+    <profile>
+      <traits xsi:type="rm:DomainExpertise" name="domainExpertise" level="moderate"/>
+      <traits xsi:type="rm:AIMLLiteracy" name="aiLiteracy" level="moderate"/>
+      <traits xsi:type="rm:GraphLiteracy" name="graphLiteracy" level="moderate"/>
+      <traits xsi:type="rm:Numeracy" name="numeracy" level="moderate"/>
+      <traits xsi:type="rm:DispositionalTrust" name="dispositionalTrust" level="moderate"/>
+    </profile>
+    <contexts startedAt="2026-03-12T09:00:00.000+0000">
+      <states xsi:type="rm:CognitiveLoad" name="cognitiveLoad" level="moderate"/>
+      <requests label="balanced-request">
+        <factors xsi:type="rm:Stakes" name="stakes" level="moderate"/>
+        <factors xsi:type="rm:SituationalTrust" name="situationalTrust" level="moderate"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+  <rm:Recipient id="ec3-structural">
+    <profile/>
+    <contexts startedAt="2026-03-12T10:00:00.000+0000">
+      <states xsi:type="rm:CognitiveLoad" name="cognitiveLoad" level="high"/>
+      <requests label="stakes-versus-load">
+        <factors xsi:type="rm:ExplanationPurpose" name="purpose" kind="learn"/>
+        <factors xsi:type="rm:Stakes" name="stakes" level="high"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+  <rm:Recipient id="ec4-unsatisfiable">
+    <profile>
+      <traits xsi:type="rm:AIMLLiteracy" name="aiLiteracy"/>
+      <traits xsi:type="rm:AccessibilityNeed" name="visionNeed">
+        <excludedModalities>visualPlot</excludedModalities>
+        <excludedModalities>tabular</excludedModalities>
+      </traits>
+      <traits xsi:type="rm:AccessibilityNeed" name="audioRestriction">
+        <excludedModalities>speech</excludedModalities>
+        <excludedModalities>structuredText</excludedModalities>
+      </traits>
+    </profile>
+    <contexts startedAt="2026-03-12T11:00:00.000+0000">
+      <states xsi:type="rm:CognitiveLoad" name="cognitiveLoad" level="moderate"/>
+      <requests label="unsatisfiable-request">
+        <factors xsi:type="rm:ExplanationPurpose" name="purpose" kind="contest"/>
+        <factors xsi:type="rm:Stakes" name="stakes" level="high"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+  <rm:Recipient id="ec5-securitycap">
+    <profile>
+      <traits xsi:type="rm:DomainExpertise" name="domainExpertise" level="high"/>
+      <traits xsi:type="rm:AIMLLiteracy" name="aiLiteracy" level="high"/>
+    </profile>
+    <contexts startedAt="2026-03-12T12:00:00.000+0000">
+      <states xsi:type="rm:CognitiveLoad" name="cognitiveLoad"/>
+      <requests label="capped-request">
+        <factors xsi:type="rm:ExplanationPurpose" name="purpose"/>
+        <factors xsi:type="rm:Stakes" name="stakes" level="high"/>
+        <factors xsi:type="rm:SecurityPrivacyConstraint" name="secCap"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+</xmi:XMI>

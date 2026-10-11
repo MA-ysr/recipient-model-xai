@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="recipientmodel" nsURI="http://recipientmodel/1.1" nsPrefix="rm">
+  <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore">
+    <details key="invocationDelegates" value="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot"/>
+    <details key="settingDelegates" value="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot"/>
+    <details key="validationDelegates" value="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot"/>
+  </eAnnotations>
+  <eClassifiers xsi:type="ecore:EClass" name="RecipientFactor" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StableTrait" abstract="true" eSuperTypes="#//RecipientFactor"/>
+  <eClassifiers xsi:type="ecore:EClass" name="VolatileState" abstract="true" eSuperTypes="#//RecipientFactor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="sensedAt" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="source" eType="#//AcquisitionSource"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SituationalFactor" abstract="true" eSuperTypes="#//RecipientFactor"/>
+  <eClassifiers xsi:type="ecore:EClass" name="HardConstraint" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DomainExpertise" eSuperTypes="#//StableTrait">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AIMLLiteracy" eSuperTypes="#//StableTrait">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GraphLiteracy" eSuperTypes="#//StableTrait">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Numeracy" eSuperTypes="#//StableTrait">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CognitiveStyle" eSuperTypes="#//StableTrait">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="visualVerbal" eType="#//VVStyle"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="analyticHolistic" eType="#//AHStyle"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rationalIntuitive" eType="#//RIStyle"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Language" eSuperTypes="#//StableTrait">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="code" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AccessibilityNeed" eSuperTypes="#//StableTrait #//HardConstraint">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="excludedModalities" upperBound="-1"
+        eType="#//Modality"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DispositionalTrust" eSuperTypes="#//StableTrait">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CognitiveLoad" eSuperTypes="#//VolatileState">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LearnedTrust" eSuperTypes="#//VolatileState">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExplanationPurpose" eSuperTypes="#//SituationalFactor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="#//PurposeKind"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TaskRole" eSuperTypes="#//SituationalFactor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="role" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Stakes" eSuperTypes="#//SituationalFactor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RegulatoryRegime" eSuperTypes="#//SituationalFactor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="documentationDuty" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SecurityPrivacyConstraint" eSuperTypes="#//SituationalFactor #//HardConstraint">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="granularityCap" eType="#//GranularityLevel"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CollectiveContext" eSuperTypes="#//SituationalFactor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="audience" eType="#//AudienceKind"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mode" eType="#//CommMode"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SituationalTrust" eSuperTypes="#//SituationalFactor">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="#//Level"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Recipient">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profile" lowerBound="1"
+        eType="#//RecipientProfile" containment="true" eOpposite="#//RecipientProfile/recipient"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="contexts" upperBound="-1"
+        eType="#//SessionContext" containment="true" eOpposite="#//SessionContext/recipient"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RecipientProfile">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="traits" upperBound="-1"
+        eType="#//StableTrait" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="recipient" lowerBound="1"
+        eType="#//Recipient" eOpposite="#//Recipient/profile"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SessionContext">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="startedAt" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDate"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="states" upperBound="-1"
+        eType="#//VolatileState" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="requests" upperBound="-1"
+        eType="#//ExplanationRequest" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="recipient" lowerBound="1"
+        eType="#//Recipient" eOpposite="#//Recipient/contexts"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExplanationRequest">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore">
+      <details key="constraints" value="purposeStated"/>
+    </eAnnotations>
+    <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot">
+      <details key="purposeStated" value="factors->exists(f | f.oclIsKindOf(ExplanationPurpose))"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="factors" upperBound="-1"
+        eType="#//SituationalFactor" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="label" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExplanationRequirement">
+    <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore">
+      <details key="constraints" value="salienceWithinContent respectsAccessibility respectsGranularityCap onDemandIsFuller sameRecipient layRegisterForLowLiteracy"/>
+    </eAnnotations>
+    <eAnnotations source="http://www.eclipse.org/emf/2002/Ecore/OCL/Pivot">
+      <details key="salienceWithinContent" value="content->includesAll(salience)"/>
+      <details key="respectsAccessibility" value="profile.traits->selectByKind(AccessibilityNeed)->forAll(a | not a.excludedModalities->includes(modality))"/>
+      <details key="respectsGranularityCap" value="request.factors->selectByKind(SecurityPrivacyConstraint)->forAll(s | let order : Sequence(GranularityLevel) = Sequence{GranularityLevel::headline, GranularityLevel::factorList, GranularityLevel::mechanistic} in order->indexOf(granularity) &lt;= order->indexOf(s.granularityCap))"/>
+      <details key="onDemandIsFuller" value="granularityOnDemand &lt;> null implies (let order : Sequence(GranularityLevel) = Sequence{GranularityLevel::headline, GranularityLevel::factorList, GranularityLevel::mechanistic} in order->indexOf(granularityOnDemand) > order->indexOf(granularity))"/>
+      <details key="sameRecipient" value="profile.recipient = context.recipient"/>
+      <details key="layRegisterForLowLiteracy" value="profile.traits->selectByKind(AIMLLiteracy)->forAll(l | l.level = Level::low implies register = Register::lay)"/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="method" eType="#//MethodKind"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="granularity" eType="#//GranularityLevel"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="granularityOnDemand" eType="#//GranularityLevel"
+        unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="modality" eType="#//Modality"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="register" eType="#//Register"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="language" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="persistent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="length" eType="#//LengthLevel"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="content" upperBound="-1"
+        eType="#//ContentElement"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="salience" upperBound="-1"
+        eType="#//ContentElement"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="profile" lowerBound="1"
+        eType="#//RecipientProfile"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="context" lowerBound="1"
+        eType="#//SessionContext"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="request" lowerBound="1"
+        eType="#//ExplanationRequest"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DerivationEngine">
+    <eOperations name="resolve" eType="#//ExplanationRequirement">
+      <eParameters name="p" eType="#//RecipientProfile"/>
+      <eParameters name="c" eType="#//SessionContext"/>
+      <eParameters name="r" eType="#//ExplanationRequest"/>
+    </eOperations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Level">
+    <eLiterals name="low"/>
+    <eLiterals name="moderate" value="1"/>
+    <eLiterals name="high" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="GranularityLevel">
+    <eLiterals name="headline"/>
+    <eLiterals name="factorList" value="1"/>
+    <eLiterals name="mechanistic" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Modality">
+    <eLiterals name="visualPlot"/>
+    <eLiterals name="structuredText" value="1"/>
+    <eLiterals name="speech" value="2"/>
+    <eLiterals name="tabular" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="MethodKind">
+    <eLiterals name="attribution"/>
+    <eLiterals name="surrogateRules" value="1"/>
+    <eLiterals name="counterfactual" value="2"/>
+    <eLiterals name="exampleBased" value="3"/>
+    <eLiterals name="nlRationale" value="4"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="LengthLevel">
+    <eLiterals name="short"/>
+    <eLiterals name="medium" value="1"/>
+    <eLiterals name="long" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="PurposeKind">
+    <eLiterals name="debug"/>
+    <eLiterals name="justify" value="1"/>
+    <eLiterals name="learn" value="2"/>
+    <eLiterals name="contest" value="3"/>
+    <eLiterals name="audit" value="4"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Register">
+    <eLiterals name="technical"/>
+    <eLiterals name="lay" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="VVStyle">
+    <eLiterals name="visualizer"/>
+    <eLiterals name="verbalizer" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="AHStyle">
+    <eLiterals name="analytic"/>
+    <eLiterals name="holistic" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="RIStyle">
+    <eLiterals name="rational"/>
+    <eLiterals name="intuitive" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="AudienceKind">
+    <eLiterals name="individual"/>
+    <eLiterals name="group" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="CommMode">
+    <eLiterals name="static"/>
+    <eLiterals name="conversational" value="1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="AcquisitionSource">
+    <eLiterals name="sensed"/>
+    <eLiterals name="selfReport" value="1"/>
+    <eLiterals name="inferred" value="2"/>
+    <eLiterals name="institutionalRecord" value="3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="ContentElement">
+    <eLiterals name="decisiveFactors"/>
+    <eLiterals name="fullAttribution" value="1"/>
+    <eLiterals name="counterfactuals" value="2"/>
+    <eLiterals name="confidenceValues" value="3"/>
+    <eLiterals name="uncertainty" value="4"/>
+    <eLiterals name="evidence" value="5"/>
+    <eLiterals name="contrastiveReasons" value="6"/>
+    <eLiterals name="complianceRecord" value="7"/>
+  </eClassifiers>
+</ecore:EPackage>

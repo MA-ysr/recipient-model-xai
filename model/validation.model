@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rm="http://recipientmodel/1.1">
+  <rm:Recipient id="val-a">
+    <profile>
+      <traits xsi:type="rm:AIMLLiteracy" name="aiLiteracy"/>
+      <traits xsi:type="rm:AccessibilityNeed" name="accessibility">
+        <excludedModalities>visualPlot</excludedModalities>
+        <excludedModalities>tabular</excludedModalities>
+      </traits>
+    </profile>
+    <contexts startedAt="2026-03-13T09:00:00.000+0000">
+      <states xsi:type="rm:CognitiveLoad" name="cognitiveLoad" level="moderate"/>
+      <requests label="val-a-request">
+        <factors xsi:type="rm:ExplanationPurpose" name="purpose" kind="contest"/>
+        <factors xsi:type="rm:SecurityPrivacyConstraint" name="cap" granularityCap="factorList"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+  <rm:Recipient id="val-b">
+    <profile>
+      <traits xsi:type="rm:AIMLLiteracy" name="aiLiteracy" level="high"/>
+    </profile>
+    <contexts startedAt="2026-03-13T10:00:00.000+0000">
+      <requests label="val-b-request-no-purpose"/>
+    </contexts>
+  </rm:Recipient>
+  <rm:ExplanationRequirement method="counterfactual" granularity="factorList" modality="speech" register="lay" profile="/0/@profile" context="/0/@contexts.0" request="/0/@contexts.0/@requests.0">
+    <content>decisiveFactors</content>
+    <content>counterfactuals</content>
+    <salience>counterfactuals</salience>
+  </rm:ExplanationRequirement>
+  <rm:ExplanationRequirement method="counterfactual" granularity="factorList" register="lay" profile="/0/@profile" context="/0/@contexts.0" request="/0/@contexts.0/@requests.0">
+    <content>decisiveFactors</content>
+    <salience>decisiveFactors</salience>
+  </rm:ExplanationRequirement>
+  <rm:ExplanationRequirement method="counterfactual" granularity="factorList" modality="speech" register="lay" profile="/0/@profile" context="/0/@contexts.0" request="/0/@contexts.0/@requests.0">
+    <content>decisiveFactors</content>
+    <salience>uncertainty</salience>
+  </rm:ExplanationRequirement>
+  <rm:ExplanationRequirement method="counterfactual" granularity="factorList" modality="speech" register="lay" profile="/0/@profile" context="/1/@contexts.0" request="/1/@contexts.0/@requests.0">
+    <content>decisiveFactors</content>
+    <salience>decisiveFactors</salience>
+  </rm:ExplanationRequirement>
+  <rm:ExplanationRequirement method="counterfactual" granularity="factorList" modality="speech" profile="/0/@profile" context="/0/@contexts.0" request="/0/@contexts.0/@requests.0">
+    <content>decisiveFactors</content>
+    <salience>decisiveFactors</salience>
+  </rm:ExplanationRequirement>
+  <rm:ExplanationRequirement granularity="mechanistic" modality="speech" register="lay" profile="/0/@profile" context="/0/@contexts.0" request="/0/@contexts.0/@requests.0">
+    <content>fullAttribution</content>
+    <salience>fullAttribution</salience>
+  </rm:ExplanationRequirement>
+  <rm:ExplanationRequirement method="counterfactual" granularity="factorList" granularityOnDemand="headline" modality="speech" register="lay" profile="/0/@profile" context="/0/@contexts.0" request="/0/@contexts.0/@requests.0">
+    <content>decisiveFactors</content>
+    <salience>decisiveFactors</salience>
+  </rm:ExplanationRequirement>
+</xmi:XMI>

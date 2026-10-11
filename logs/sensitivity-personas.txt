@@ -1,0 +1,77 @@
+========================================================================
+ONE-FACTOR-AT-A-TIME WEIGHT SENSITIVITY   grid: 0.0, 0.5, 2.0, 4.0
+========================================================================
+
+RECIPIENT: youssef    REQUEST: declined-application-4471
+   baseline method      attribution
+   baseline granularity mechanistic
+   baseline modality    visualPlot
+   baseline register    technical
+   baseline persistent  false
+   baseline length      short
+   baseline content     decisiveFactors+fullAttribution
+   baseline salience    decisiveFactors
+   FLIP granularity mechanistic  ->  headline   when w(DomainExpertise) = 0.0
+   FLIP length      short  ->  long   when w(DomainExpertise) = 0.0
+   FLIP granularity mechanistic  ->  headline (+on demand: mechanistic)   when w(DomainExpertise) = 0.5
+   FLIP length      short  ->  long   when w(DomainExpertise) = 0.5
+   FLIP modality    visualPlot  ->  structuredText   when w(AIMLLiteracy) = 0.0
+   FLIP register    technical  ->  lay   when w(AIMLLiteracy) = 0.0
+   FLIP method      attribution  ->  surrogateRules   when w(ExplanationPurpose) = 0.0
+   FLIP granularity mechanistic  ->  headline (+on demand: mechanistic)   when w(ExplanationPurpose) = 0.0
+   FLIP length      short  ->  long   when w(ExplanationPurpose) = 2.0
+   FLIP length      short  ->  long   when w(ExplanationPurpose) = 4.0
+   FLIP granularity mechanistic  ->  headline   when w(Stakes) = 2.0
+   FLIP granularity mechanistic  ->  headline   when w(Stakes) = 4.0
+
+RECIPIENT: nihal    REQUEST: declined-application-4471
+   baseline method      nlRationale
+   baseline granularity headline (+on demand: factorList)
+   baseline modality    structuredText
+   baseline register    lay
+   baseline persistent  true
+   baseline length      short
+   baseline content     decisiveFactors+contrastiveReasons+complianceRecord
+   baseline salience    contrastiveReasons
+   FLIP granularity headline (+on demand: factorList)  ->  factorList   when w(CognitiveLoad) = 0.0
+   FLIP length      short  ->  long   when w(CognitiveLoad) = 0.0
+   FLIP granularity headline (+on demand: factorList)  ->  factorList   when w(CognitiveLoad) = 0.5
+   FLIP length      short  ->  long   when w(CognitiveLoad) = 0.5
+   FLIP granularity headline (+on demand: factorList)  ->  headline   when w(CognitiveLoad) = 2.0
+   FLIP granularity headline (+on demand: factorList)  ->  headline   when w(CognitiveLoad) = 4.0
+   FLIP granularity headline (+on demand: factorList)  ->  headline   when w(ExplanationPurpose) = 0.0
+   FLIP salience    contrastiveReasons  ->  decisiveFactors   when w(ExplanationPurpose) = 0.0
+   FLIP granularity headline (+on demand: factorList)  ->  headline   when w(ExplanationPurpose) = 0.5
+   FLIP granularity headline (+on demand: factorList)  ->  factorList   when w(ExplanationPurpose) = 2.0
+   FLIP granularity headline (+on demand: factorList)  ->  factorList   when w(ExplanationPurpose) = 4.0
+   FLIP persistent  true  ->  false   when w(RegulatoryRegime) = 0.0
+   FLIP content     decisiveFactors+contrastiveReasons+complianceRecord  ->  decisiveFactors+contrastiveReasons   when w(RegulatoryRegime) = 0.0
+   FLIP length      short  ->  long   when w(RegulatoryRegime) = 2.0
+   FLIP length      short  ->  long   when w(RegulatoryRegime) = 4.0
+
+RECIPIENT: moncef    REQUEST: declined-application-4471
+   baseline method      counterfactual
+   baseline granularity factorList
+   baseline modality    structuredText
+   baseline register    lay
+   baseline persistent  false
+   baseline length      short
+   baseline content     decisiveFactors+counterfactuals
+   baseline salience    counterfactuals
+   FLIP granularity factorList  ->  factorList (+on demand: mechanistic)   when w(DomainExpertise) = 0.0
+   FLIP granularity factorList  ->  headline (+on demand: factorList)   when w(DomainExpertise) = 2.0
+   FLIP length      short  ->  long   when w(DomainExpertise) = 2.0
+   FLIP granularity factorList  ->  headline   when w(DomainExpertise) = 4.0
+   FLIP length      short  ->  long   when w(DomainExpertise) = 4.0
+   FLIP method      counterfactual  ->  nlRationale   when w(AIMLLiteracy) = 2.0
+   FLIP method      counterfactual  ->  nlRationale   when w(AIMLLiteracy) = 4.0
+   FLIP method      counterfactual  ->  nlRationale   when w(ExplanationPurpose) = 0.0
+   FLIP granularity factorList  ->  headline (+on demand: mechanistic)   when w(ExplanationPurpose) = 0.0
+   FLIP length      short  ->  long   when w(ExplanationPurpose) = 0.0
+   FLIP content     decisiveFactors+counterfactuals  ->  decisiveFactors   when w(ExplanationPurpose) = 0.0
+   FLIP salience    counterfactuals  ->  decisiveFactors   when w(ExplanationPurpose) = 0.0
+   FLIP length      short  ->  long   when w(ExplanationPurpose) = 0.5
+   FLIP method      counterfactual  ->  nlRationale   when w(Stakes) = 0.0
+   FLIP granularity factorList  ->  headline (+on demand: factorList)   when w(Stakes) = 0.0
+   FLIP granularity factorList  ->  factorList (+on demand: mechanistic)   when w(Stakes) = 2.0
+   FLIP granularity factorList  ->  mechanistic   when w(Stakes) = 4.0

@@ -1,0 +1,101 @@
+// ===================================================================
+//  validate.evl
+//  Executable counterpart of Listing 1 (OCL well-formedness invariants).
+//  Epsilon EVL evaluates the same conditions the paper states in OCL,
+//  so that ill-formed model instances are *rejected* rather than
+//  merely scored poorly.
+// ===================================================================
+
+import "pressures.eol";
+
+context ExplanationRequirement {
+
+    // (1) foregrounded content must be a subset of included content
+    constraint salienceWithinContent {
+        check {
+            return self.salience.forAll(e | self.content.includes(e));
+        }
+        message : "salienceWithinContent violated: salience contains an element "
+                + "absent from content."
+    }
+
+    // (2) HARD -- never select a modality an accessibility need excludes
+    constraint respectsAccessibility {
+        check {
+            var blocked : Sequence;
+            for (t in self.profile.traits.select(t | t.isKindOf(AccessibilityNeed))) {
+                for (m in t.excludedModalities) { blocked.add(nm(m)); }
+            }
+            return not blocked.includes(nm(self.modality));
+        }
+        message : "respectsAccessibility violated: modality " + nm(self.modality)
+                + " is excluded by an AccessibilityNeed of recipient "
+                + self.profile.recipient.id + "."
+    }
+
+    // (3) HARD -- granularity may not exceed a security cap
+    constraint respectsGranularityCap {
+        check {
+            var caps = self.request.factors
+                           .select(f | f.isKindOf(SecurityPrivacyConstraint));
+            return caps.forAll(c |
+                rankOf("granularity", nm(self.granularity))
+                    <= rankOf("granularity", nm(c.granularityCap)));
+        }
+        message : "respectsGranularityCap violated: granularity "
+                + nm(self.granularity) + " exceeds the security cap."
+    }
+
+    // (5) an on-demand layer must be strictly fuller than the primary setting.
+    constraint onDemandIsFuller {
+        check {
+            var feat = self.eClass().getEStructuralFeature("granularityOnDemand");
+            if (not self.eIsSet(feat)) { return true; }
+            return rankOf("granularity", nm(self.granularityOnDemand))
+                 > rankOf("granularity", nm(self.granularity));
+        }
+        message : "onDemandIsFuller violated: the on-demand layer is not fuller "
+                + "than the primary setting."
+    }
+
+    // (6) the profile and the session used in a derivation must belong to
+    constraint sameRecipient {
+        check {
+            var ctxFeature = self.eClass().getEStructuralFeature("context");
+            var session = self.eGet(ctxFeature);
+            var ownerOfProfile = self.profile.eContainer();
+            var ownerOfSession = session.eContainer();
+            if (ownerOfProfile = ownerOfSession) { return true; }
+            return false;
+        }
+        message : "sameRecipient violated: the requirement combines the profile of "
+                + self.profile.eContainer().id
+                + " with a session belonging to another recipient."
+    }
+
+    // (7) low AI/ML literacy requires a lay register   [added for Reviewer 1]
+    constraint layRegisterForLowLiteracy {
+        check {
+            var lits = self.profile.traits.select(t | t.isKindOf(AIMLLiteracy));
+            var reg = nm(self.register);
+            for (l in lits) {
+                if (lvlOf(l.level) = 0 and reg <> "lay") { return false; }
+            }
+            return true;
+        }
+        message : "layRegisterForLowLiteracy violated: a technical register was "
+                + "derived for a recipient with low AI/ML literacy."
+    }
+}
+
+context ExplanationRequest {
+
+    // (4) every request must state its purpose
+    constraint purposeStated {
+        check {
+            return self.factors.exists(f | f.isKindOf(ExplanationPurpose));
+        }
+        message : "purposeStated violated: request '" + self.label
+                + "' declares no ExplanationPurpose."
+    }
+}

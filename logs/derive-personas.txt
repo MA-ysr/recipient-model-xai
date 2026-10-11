@@ -1,0 +1,217 @@
+========================================================================
+EXPLANATION-REQUIREMENT DERIVATION -- Algorithm 1 (7 properties)
+cold-start default: equal ordinal weights, TOLERANCE = 0.001
+========================================================================
+
+------------------------------------------------------------------------
+RECIPIENT: youssef    REQUEST: declined-application-4471
+------------------------------------------------------------------------
+  active factors (5):
+    - DomainExpertise           level=high
+    - AIMLLiteracy              level=high
+    - ExplanationPurpose        kind=debug
+    - TaskRole                  role=developer
+    - Stakes                    level=low
+
+  [method]
+    score(attribution     ) = 2.0
+    score(surrogateRules  ) = 1.0
+    score(counterfactual  ) = -1.0
+    score(exampleBased    ) = 0.0
+    score(nlRationale     ) = -2.0
+    -> clear winner: attribution
+
+  [granularity]
+    score(headline        ) = 0.0
+    score(factorList      ) = 0.0
+    score(mechanistic     ) = 1.0
+    -> clear winner: mechanistic
+
+  [modality]
+    score(visualPlot      ) = 1.0
+    score(structuredText  ) = -1.0
+    score(speech          ) = -1.0
+    score(tabular         ) = 0.0
+    -> clear winner: visualPlot
+
+  [register]
+    score(technical       ) = 1.0
+    score(lay             ) = -1.0
+    -> clear winner: technical
+
+  [persistent]
+    score(false           ) = 0.0
+    score(true            ) = 0.0
+    -> tie false/true : conservative -> false
+
+  [length]
+    score(short           ) = 0.0
+    score(medium          ) = -1.0
+    score(long            ) = 0.0
+    -> tie short/long : conservative -> short
+
+  [content]
+    score(decisiveFactors   ) = 1.0  <- selected
+    score(fullAttribution   ) = 2.0  <- selected
+    score(counterfactuals   ) = 0.0
+    score(confidenceValues  ) = 0.0
+    score(uncertainty       ) = 0.0
+    score(evidence          ) = 0.0
+    score(contrastiveReasons) = 0.0
+    score(complianceRecord  ) = 0.0
+
+  [salience]
+    score(decisiveFactors   ) = 1.0  <- selected
+    score(fullAttribution   ) = 0.0
+
+  DERIVED REQUIREMENT
+    method      = attribution
+    granularity = mechanistic
+    modality    = visualPlot
+    format      = register: technical | persistent: false | language: default
+    length      = short
+    content     = {decisiveFactors, fullAttribution}
+    salience    = {decisiveFactors}
+
+------------------------------------------------------------------------
+RECIPIENT: nihal    REQUEST: declined-application-4471
+------------------------------------------------------------------------
+  active factors (6):
+    - DomainExpertise           level=moderate
+    - AIMLLiteracy              level=low
+    - CognitiveLoad             level=high
+    - ExplanationPurpose        kind=justify
+    - TaskRole                  role=frontline
+    - RegulatoryRegime          documentationDuty=true
+
+  [method]
+    score(attribution     ) = -2.0
+    score(surrogateRules  ) = -1.0
+    score(counterfactual  ) = 0.0
+    score(exampleBased    ) = 0.0
+    score(nlRationale     ) = 2.0
+    -> clear winner: nlRationale
+
+  [granularity]
+    score(headline        ) = 1.0
+    score(factorList      ) = 1.0
+    score(mechanistic     ) = -1.0
+    -> tie headline/factorList : STRUCTURAL -> layered headline + factorList on demand
+
+  [modality]
+    score(visualPlot      ) = -1.0
+    score(structuredText  ) = 1.0
+    score(speech          ) = 1.0
+    score(tabular         ) = 0.0
+    -> tie structuredText/speech : conservative -> structuredText
+
+  [register]
+    score(technical       ) = -1.0
+    score(lay             ) = 1.0
+    -> clear winner: lay
+
+  [persistent]
+    score(false           ) = -1.0
+    score(true            ) = 1.0
+    -> clear winner: true
+
+  [length]
+    score(short           ) = 0.0
+    score(medium          ) = 0.0
+    score(long            ) = 0.0
+    -> tie short/medium/long : conservative -> short
+
+  [content]
+    score(decisiveFactors   ) = 1.0  <- selected
+    score(fullAttribution   ) = 0.0
+    score(counterfactuals   ) = 0.0
+    score(confidenceValues  ) = 0.0
+    score(uncertainty       ) = 0.0
+    score(evidence          ) = 0.0
+    score(contrastiveReasons) = 2.0  <- selected
+    score(complianceRecord  ) = 1.0  <- selected
+
+  [salience]
+    score(decisiveFactors   ) = 0.0
+    score(contrastiveReasons) = 1.0  <- selected
+    score(complianceRecord  ) = 0.0
+
+  DERIVED REQUIREMENT
+    method      = nlRationale
+    granularity = headline  (+ on demand: factorList)
+    modality    = structuredText
+    format      = register: lay | persistent: true | language: default
+    length      = short
+    content     = {decisiveFactors, contrastiveReasons, complianceRecord}
+    salience    = {contrastiveReasons}
+
+------------------------------------------------------------------------
+RECIPIENT: moncef    REQUEST: declined-application-4471
+------------------------------------------------------------------------
+  active factors (7):
+    - DomainExpertise           level=low
+    - AIMLLiteracy              level=low
+    - Language                  code=ar
+    - AccessibilityNeed         excludes=visualPlot/tabular
+    - ExplanationPurpose        kind=contest
+    - TaskRole                  role=applicant
+    - Stakes                    level=high
+
+  [method]
+    score(attribution     ) = -2.0
+    score(surrogateRules  ) = -1.0
+    score(counterfactual  ) = 2.0
+    score(exampleBased    ) = 0.0
+    score(nlRationale     ) = 1.0
+    -> clear winner: counterfactual
+
+  [granularity]
+    score(headline        ) = 0.0
+    score(factorList      ) = 1.0
+    score(mechanistic     ) = 0.0
+    -> clear winner: factorList
+
+  [modality]
+    hard filter removed: visualPlot, tabular
+    score(structuredText  ) = 1.0
+    score(speech          ) = 1.0
+    -> tie structuredText/speech : conservative -> structuredText
+
+  [register]
+    score(technical       ) = -1.0
+    score(lay             ) = 1.0
+    -> clear winner: lay
+
+  [persistent]
+    score(false           ) = 0.0
+    score(true            ) = 0.0
+    -> tie false/true : conservative -> false
+
+  [length]
+    score(short           ) = 0.0
+    score(medium          ) = -1.0
+    score(long            ) = 0.0
+    -> tie short/long : conservative -> short
+
+  [content]
+    score(decisiveFactors   ) = 1.0  <- selected
+    score(fullAttribution   ) = 0.0
+    score(counterfactuals   ) = 1.0  <- selected
+    score(confidenceValues  ) = 0.0
+    score(uncertainty       ) = 0.0
+    score(evidence          ) = 0.0
+    score(contrastiveReasons) = 0.0
+    score(complianceRecord  ) = 0.0
+
+  [salience]
+    score(decisiveFactors   ) = 0.0
+    score(counterfactuals   ) = 1.0  <- selected
+
+  DERIVED REQUIREMENT
+    method      = counterfactual
+    granularity = factorList
+    modality    = structuredText
+    format      = register: lay | persistent: false | language: ar
+    length      = short
+    content     = {decisiveFactors, counterfactuals}
+    salience    = {counterfactuals}

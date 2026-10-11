@@ -1,0 +1,213 @@
+// ===================================================================
+//  engine.eol
+//  Core of Algorithm 1, shared by derive.eol (trace) and
+//  sensitivity.eol (perturbation), so both always run the same logic.
+//
+//  Scalar properties : hard filter -> signed scoring -> tie policy
+//  Set properties    : content  = base + positively demanded elements
+//                      salience = top tier of foregrounding pressure
+//  Format            : register + persistent (scored) + language (bound)
+// ===================================================================
+
+import "pressures.eol";
+
+operation scalarProperties() : Sequence {
+    return Sequence{"method", "granularity", "modality", "register", "persistent", "length"};
+}
+
+// Line 1 of Algorithm 1: F <- P u C u R, assembled in three waves
+operation factorsOf(r, ctx, req) : Sequence {
+    var F : Sequence;
+    for (t in r.profile.traits) { F.add(t); }
+    for (s in ctx.states)       { F.add(s); }
+    for (f in req.factors)      { F.add(f); }
+    return F;
+}
+
+// ------------------------------------------------------------------
+//  Scalar property: Lines 3-13 of Algorithm 1
+// ------------------------------------------------------------------
+operation resolveProperty(prop : String, F : Sequence) : Map {
+    var out : Map;
+    var removed : Sequence;
+    var feasible : Sequence;
+    var scores : Map;
+
+    for (v in domainOf(prop)) {                       // hard filter
+        var blocked = false;
+        for (f in F) {
+            if (excludedFor(f, prop).includes(nm(v))) { blocked = true; }
+        }
+        if (blocked) { removed.add(nm(v)); } else { feasible.add(v); }
+    }
+    out.put("removed", removed);
+    out.put("scores", scores);
+
+    if (feasible.size() = 0) {
+        out.put("status", "UNSATISFIABLE");
+        out.put("value", "none");
+        return out;
+    }
+
+    var best : Real = -99999.0;                       // signed soft pressures
+    for (v in feasible) {
+        var s : Real = 0.0;
+        for (f in F) { s = s + pressure(f, prop, v); }
+        scores.put(nm(v), s);
+        if (s > best) { best = s; }
+    }
+
+    var tied : Sequence;                              // tie policy
+    for (v in feasible) {
+        if (best - scores.get(nm(v)) <= TOLERANCE) { tied.add(nm(v)); }
+    }
+    out.put("tied", tied);
+
+    if (tied.size() = 1) {
+        out.put("status", "CLEAR");
+        out.put("value", tied.first());
+        return out;
+    }
+
+    var cons = conservativeOf(prop, tied);
+    // Layering is defined for granularity only: the one property whose
+    // values form a fullness scale AND whose on-demand setting the
+    // metamodel carries (granularityOnDemand).  Other ties -> conservative.
+    if (prop = "granularity" and structuralConflict(prop, F, tied, cons)) {
+        out.put("status", "LAYERED");
+        out.put("value", cons);
+        out.put("onDemand", fullestOf(prop, tied));
+    } else {
+        out.put("status", "TIE-CONSERVATIVE");
+        out.put("value", cons);
+    }
+    return out;
+}
+
+operation conservativeOf(prop : String, tied : Sequence) : String {
+    var bestName = tied.first();
+    for (n in tied) {
+        if (rankOf(prop, n) < rankOf(prop, bestName)) { bestName = n; }
+    }
+    return bestName;
+}
+
+operation fullestOf(prop : String, tied : Sequence) : String {
+    var bestName = tied.first();
+    for (n in tied) {
+        if (rankOf(prop, n) > rankOf(prop, bestName)) { bestName = n; }
+    }
+    return bestName;
+}
+
+// STRUCTURAL: some factor presses positively on a tied value strictly
+// fuller than the conservative choice.
+operation structuralConflict(prop : String, F : Sequence,
+                             tied : Sequence, conservative : String) : Boolean {
+    var consRank = rankOf(prop, conservative);
+    for (v in domainOf(prop)) {
+        if (tied.includes(nm(v)) and rankOf(prop, nm(v)) > consRank) {
+            for (f in F) {
+                if (pressure(f, prop, v) > 0) { return true; }
+            }
+        }
+    }
+    return false;
+}
+
+// ------------------------------------------------------------------
+//  Set properties
+// ------------------------------------------------------------------
+// Content: decisive factors always included (the headline is the minimal
+// explanation); any other element iff its aggregated pressure is positive
+// and no hard constraint withholds it.
+operation deriveContent(F : Sequence) : Map {
+    var out : Map;
+    var included : Sequence;
+    var removed : Sequence;
+    var scores : Map;
+    for (e in contentDomain()) {
+        var blocked = false;
+        for (f in F) {
+            if (excludedFor(f, "content").includes(e)) { blocked = true; }
+        }
+        var s : Real = 0.0;
+        for (f in F) { s = s + weightOf(f) * contentPressure(f, e); }
+        scores.put(e, s);
+        if (blocked) {
+            removed.add(e);
+        } else if (e = "decisiveFactors" or s > TOLERANCE) {
+            included.add(e);
+        }
+    }
+    out.put("included", included);
+    out.put("removed", removed);
+    out.put("scores", scores);
+    return out;
+}
+
+// Salience: top tier of positive foregrounding pressure among included
+// elements (ties kept); decisive factors by default.  A subset of content
+// by construction (invariant 1).
+operation deriveSalience(F : Sequence, included : Sequence) : Map {
+    var out : Map;
+    var scores : Map;
+    var best : Real = 0.0;
+    for (e in included) {
+        var s : Real = 0.0;
+        for (f in F) { s = s + weightOf(f) * saliencePressure(f, e); }
+        scores.put(e, s);
+        if (s > best) { best = s; }
+    }
+    var top : Sequence;
+    if (best > TOLERANCE) {
+        for (e in included) {
+            if (best - scores.get(e) <= TOLERANCE) { top.add(e); }
+        }
+    } else if (included.includes("decisiveFactors")) {
+        top.add("decisiveFactors");
+    }
+    out.put("salient", top);
+    out.put("scores", scores);
+    return out;
+}
+
+// Format/language is a value binding: +1 for the recipient's language,
+// -1 for any other, so it always wins and is bound directly.
+operation languageOf(F : Sequence) : String {
+    for (f in F) {
+        if (f.isKindOf(Language) and f.code.isDefined()) { return f.code; }
+    }
+    return "default";
+}
+
+// Compact snapshot of all seven properties (used by sensitivity.eol)
+operation deriveAll(F : Sequence) : Map {
+    var snap : Map;
+    for (p in scalarProperties()) {
+        var o = resolveProperty(p, F);
+        var v = o.get("value");
+        if (o.get("status") = "LAYERED") { v = v + " (+on demand: " + o.get("onDemand") + ")"; }
+        if (o.get("status") = "UNSATISFIABLE") { v = "<unsatisfiable>"; }
+        snap.put(p, v);
+    }
+    var inc = deriveContent(F).get("included");
+    snap.put("content", inc.concat("+"));
+    snap.put("salience", deriveSalience(F, inc).get("salient").concat("+"));
+    snap.put("language", languageOf(F));
+    return snap;
+}
+
+// ------------------------------------------------------------------
+operation String pad(n : Integer) : String {
+    var s = self;
+    while (s.length() < n) { s = s + " "; }
+    return s;
+}
+
+operation String multiply(n : Integer) : String {
+    var s = "";
+    var i = 0;
+    while (i < n) { s = s + self; i = i + 1; }
+    return s;
+}

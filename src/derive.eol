@@ -1,0 +1,131 @@
+// ===================================================================
+//  derive.eol
+//  Reference implementation of Algorithm 1 -- trace runner.
+//  Derives all SEVEN explanation properties (method, granularity,
+//  modality, format, length, content, salience) for every request in
+//  the model and prints a trace suitable for the paper's results table.
+//  The operation DerivationEngine.resolve() declared in the metamodel is
+//  realized by this module together with engine.eol.
+// ===================================================================
+
+import "engine.eol";
+
+var TOLERANCE : Real = 0.001;   // values within TOLERANCE of the best tie
+var WEIGHTS : Map;              // empty = cold-start default (all weights 1)
+
+("=".multiply(72)).println();
+("EXPLANATION-REQUIREMENT DERIVATION -- Algorithm 1 (7 properties)").println();
+("cold-start default: equal ordinal weights, TOLERANCE = " + TOLERANCE).println();
+("=".multiply(72)).println();
+
+for (r in Recipient.all) {
+    for (ctx in r.contexts) {
+        for (req in ctx.requests) { deriveFor(r, ctx, req); }
+    }
+}
+
+operation deriveFor(r, ctx, req) {
+    ("").println();
+    ("-".multiply(72)).println();
+    ("RECIPIENT: " + r.id + "    REQUEST: " + req.label).println();
+    ("-".multiply(72)).println();
+
+    var F = factorsOf(r, ctx, req);
+    ("  active factors (" + F.size() + "):").println();
+    for (f in F) { ("    - " + f.eClass().name.pad(26) + describe(f)).println(); }
+
+    var res : Map;
+    for (p in scalarProperties()) {
+        var o = resolveProperty(p, F);
+        res.put(p, o);
+        traceScalar(p, o);
+    }
+    var c = deriveContent(F);
+    traceSet("content", c.get("scores"), c.get("removed"), c.get("included"));
+    var s = deriveSalience(F, c.get("included"));
+    traceSet("salience", s.get("scores"), Sequence{}, s.get("salient"));
+
+    ("").println();
+    if (res.get("modality").get("status") = "UNSATISFIABLE" or
+        res.get("granularity").get("status") = "UNSATISFIABLE") {
+        ("  >>> REQUIREMENT UNSATISFIABLE -- deferred to a human policy decision").println();
+    }
+    ("  DERIVED REQUIREMENT").println();
+    ("    method      = " + show(res.get("method"))).println();
+    ("    granularity = " + show(res.get("granularity"))).println();
+    ("    modality    = " + show(res.get("modality"))).println();
+    ("    format      = register: " + show(res.get("register"))
+        + " | persistent: " + show(res.get("persistent"))
+        + " | language: " + languageOf(F)).println();
+    ("    length      = " + show(res.get("length"))).println();
+    ("    content     = {" + c.get("included").concat(", ") + "}").println();
+    ("    salience    = {" + s.get("salient").concat(", ") + "}").println();
+}
+
+operation show(o : Map) : String {
+    var st = o.get("status");
+    if (st = "UNSATISFIABLE") { return "<unsatisfiable>"; }
+    var v = o.get("value");
+    if (st = "LAYERED") { return v + "  (+ on demand: " + o.get("onDemand") + ")"; }
+    return v;
+}
+
+operation traceScalar(p : String, o : Map) {
+    ("").println();
+    ("  [" + p + "]").println();
+    if (o.get("removed").size() > 0) {
+        ("    hard filter removed: " + o.get("removed").concat(", ")).println();
+    }
+    if (o.get("status") = "UNSATISFIABLE") {
+        ("    feasible set EMPTY -> UNSATISFIABLE").println();
+        return;
+    }
+    var sc = o.get("scores");
+    for (v in domainOf(p)) {
+        if (sc.containsKey(nm(v))) {
+            ("    score(" + nm(v).pad(16) + ") = " + sc.get(nm(v))).println();
+        }
+    }
+    var st = o.get("status");
+    if (st = "CLEAR") { ("    -> clear winner: " + o.get("value")).println(); }
+    if (st = "TIE-CONSERVATIVE") {
+        ("    -> tie " + o.get("tied").concat("/") + " : conservative -> " + o.get("value")).println();
+    }
+    if (st = "LAYERED") {
+        ("    -> tie " + o.get("tied").concat("/") + " : STRUCTURAL -> layered "
+            + o.get("value") + " + " + o.get("onDemand") + " on demand").println();
+    }
+}
+
+operation traceSet(p : String, sc : Map, removed : Sequence, chosen : Sequence) {
+    ("").println();
+    ("  [" + p + "]").println();
+    if (removed.size() > 0) {
+        ("    hard filter removed: " + removed.concat(", ")).println();
+    }
+    for (e in contentDomain()) {
+        if (sc.containsKey(e)) {
+            var mark = "";
+            if (chosen.includes(e)) { mark = "  <- selected"; }
+            ("    score(" + e.pad(18) + ") = " + sc.get(e) + mark).println();
+        }
+    }
+}
+
+operation describe(f) : String {
+    if (f.isKindOf(ExplanationPurpose))        { return "kind=" + nm(f.kind); }
+    if (f.isKindOf(TaskRole))                  { return "role=" + f.role; }
+    if (f.isKindOf(Language))                  { return "code=" + f.code; }
+    if (f.isKindOf(RegulatoryRegime))          { return "documentationDuty=" + f.documentationDuty; }
+    if (f.isKindOf(SecurityPrivacyConstraint)) { return "cap=" + nm(f.granularityCap); }
+    if (f.isKindOf(AccessibilityNeed)) {
+        return "excludes=" + f.excludedModalities.collect(m | nm(m)).concat("/");
+    }
+    if (f.isKindOf(CollectiveContext)) {
+        return "audience=" + nm(f.audience) + ", mode=" + nm(f.mode);
+    }
+    if (f.isKindOf(CognitiveStyle)) {
+        return nm(f.visualVerbal) + "/" + nm(f.analyticHolistic) + "/" + nm(f.rationalIntuitive);
+    }
+    return "level=" + nm(f.level);
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rm="http://recipientmodel/1.1">
+  <rm:Recipient id="youssef">
+    <profile>
+      <traits xsi:type="rm:DomainExpertise" name="domainExpertise" level="high"/>
+      <traits xsi:type="rm:AIMLLiteracy" name="aiLiteracy" level="high"/>
+    </profile>
+    <contexts startedAt="2026-03-10T09:15:00.000+0000">
+      <requests label="declined-application-4471">
+        <factors xsi:type="rm:ExplanationPurpose" name="purpose"/>
+        <factors xsi:type="rm:TaskRole" name="role" role="developer"/>
+        <factors xsi:type="rm:Stakes" name="stakes"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+  <rm:Recipient id="nihal">
+    <profile>
+      <traits xsi:type="rm:DomainExpertise" name="domainExpertise" level="moderate"/>
+      <traits xsi:type="rm:AIMLLiteracy" name="aiLiteracy"/>
+    </profile>
+    <contexts startedAt="2026-03-10T14:40:00.000+0000">
+      <states xsi:type="rm:CognitiveLoad" name="cognitiveLoad" source="inferred" level="high"/>
+      <requests label="declined-application-4471">
+        <factors xsi:type="rm:ExplanationPurpose" name="purpose" kind="justify"/>
+        <factors xsi:type="rm:TaskRole" name="role" role="frontline"/>
+        <factors xsi:type="rm:RegulatoryRegime" name="regime" documentationDuty="true"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+  <rm:Recipient id="moncef">
+    <profile>
+      <traits xsi:type="rm:DomainExpertise" name="domainExpertise"/>
+      <traits xsi:type="rm:AIMLLiteracy" name="aiLiteracy"/>
+      <traits xsi:type="rm:Language" name="language" code="ar"/>
+      <traits xsi:type="rm:AccessibilityNeed" name="accessibility">
+        <excludedModalities>visualPlot</excludedModalities>
+        <excludedModalities>tabular</excludedModalities>
+      </traits>
+    </profile>
+    <contexts startedAt="2026-03-11T10:05:00.000+0000">
+      <requests label="declined-application-4471">
+        <factors xsi:type="rm:ExplanationPurpose" name="purpose" kind="contest"/>
+        <factors xsi:type="rm:TaskRole" name="role" role="applicant"/>
+        <factors xsi:type="rm:Stakes" name="stakes" level="high"/>
+      </requests>
+    </contexts>
+  </rm:Recipient>
+</xmi:XMI>

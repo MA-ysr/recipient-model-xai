@@ -1,0 +1,7 @@
+layRegisterForLowLiteracy violated: a technical register was derived for a recipient with low AI/ML literacy.
+onDemandIsFuller violated: the on-demand layer is not fuller than the primary setting.
+purposeStated violated: request 'val-b-request-no-purpose' declares no ExplanationPurpose.
+respectsAccessibility violated: modality visualPlot is excluded by an AccessibilityNeed of recipient val-a
+respectsGranularityCap violated: granularity mechanistic exceeds the security cap.
+salienceWithinContent violated: salience contains an element absent from content.
+sameRecipient violated: the requirement combines the profile of val-a with a session belonging to another recipient.

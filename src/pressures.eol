@@ -1,0 +1,358 @@
+// ===================================================================
+//  pressures.eol
+//  Machine-readable encoding of Table 2 (factor-to-property mapping).
+//
+//  Covers the SEVEN explanation properties:
+//    method, granularity, modality, format, length, content, salience
+//  where FORMAT is carried by three metamodel slots:
+//    register   (technical vs. lay vocabulary)    -> scored
+//    persistent (durable / documentable)          -> scored
+//    language   (recipient's language)            -> bound directly
+//
+//  Scalar pressures return a signed value in [-1, 1] under the
+//  cold-start ordinal default: monotone for ordinal factors,
+//  value-matching for categorical factors.  weightOf(f) applies the
+//  per-factor-type weights used by the sensitivity analysis (1.0 by
+//  default).  The globals TOLERANCE and WEIGHTS are declared by the
+//  runner module (derive.eol / sensitivity.eol).
+// ===================================================================
+
+// ---------------------------------------------------------------- helpers
+operation nm(x) : String {
+    if (x.isDefined()) { return x.toString(); }
+    return "none";
+}
+
+// Level -> 0 (low) | 1 (moderate) | 2 (high)
+operation lvlOf(x) : Integer {
+    var n = nm(x);
+    if (n = "low")      { return 0; }
+    if (n = "moderate") { return 1; }
+    if (n = "high")     { return 2; }
+    return 1;
+}
+
+// Level -> -1 (low) | 0 (moderate) | +1 (high)
+operation signOf(x) : Real {
+    return (lvlOf(x) - 1).asReal();
+}
+
+operation weightOf(f) : Real {
+    var k = f.eClass().name;
+    if (WEIGHTS.containsKey(k)) { return WEIGHTS.get(k); }
+    return 1.0;
+}
+
+// ---------------------------------------------------------------- orders
+// Burden order: lowest burden first.  Conservative() picks the lowest-
+// ranked tied value, Fullest() the highest.  Modality places static
+// text before transient speech, following the transient-information
+// effect of cognitive load theory (see README).
+operation burdenOrder(prop : String) : Sequence {
+    if (prop = "granularity") { return Sequence{"headline", "factorList", "mechanistic"}; }
+    if (prop = "length")      { return Sequence{"short", "medium", "long"}; }
+    if (prop = "register")    { return Sequence{"lay", "technical"}; }
+    if (prop = "persistent")  { return Sequence{"false", "true"}; }
+    if (prop = "method")      { return Sequence{"nlRationale", "counterfactual", "exampleBased", "surrogateRules", "attribution"}; }
+    if (prop = "modality")    { return Sequence{"structuredText", "speech", "tabular", "visualPlot"}; }
+    return Sequence{};
+}
+
+operation rankOf(prop : String, valueName : String) : Integer {
+    var order = burdenOrder(prop);
+    var i = 0;
+    while (i < order.size()) {
+        if (order.at(i) = valueName) { return i; }
+        i = i + 1;
+    }
+    return 0;
+}
+
+// ---------------------------------------------------------------- domains
+operation domainOf(prop : String) : Sequence {
+    if (prop = "method") {
+        return Sequence{MethodKind#attribution, MethodKind#surrogateRules,
+                        MethodKind#counterfactual, MethodKind#exampleBased,
+                        MethodKind#nlRationale};
+    }
+    if (prop = "granularity") {
+        return Sequence{GranularityLevel#headline, GranularityLevel#factorList,
+                        GranularityLevel#mechanistic};
+    }
+    if (prop = "modality") {
+        return Sequence{Modality#visualPlot, Modality#structuredText,
+                        Modality#speech, Modality#tabular};
+    }
+    if (prop = "register")   { return Sequence{Register#technical, Register#lay}; }
+    if (prop = "persistent") { return Sequence{false, true}; }
+    if (prop = "length") {
+        return Sequence{LengthLevel#short, LengthLevel#medium, LengthLevel#long};
+    }
+    return Sequence{};
+}
+
+// Content and salience range over sets of ContentElement literals;
+// they are handled by name.
+operation contentDomain() : Sequence {
+    return Sequence{"decisiveFactors", "fullAttribution", "counterfactuals",
+                    "confidenceValues", "uncertainty", "evidence",
+                    "contrastiveReasons", "complianceRecord"};
+}
+
+// ================================================================ SCALARS
+
+// ---------- METHOD ----------
+operation pressureOnMethod(f, v) : Real {
+    var m = nm(v);
+    if (f.isKindOf(AIMLLiteracy)) {                  // Table 2: Method, Modality
+        var s = signOf(f.level);
+        if (m = "attribution" or m = "surrogateRules") { return s; }
+        if (m = "nlRationale") { return 0 - s; }
+        return 0;
+    }
+    if (f.isKindOf(CognitiveStyle)) {                // Table 2: Modality, Method
+        var p = 0.0;
+        if (nm(f.analyticHolistic) = "analytic") {
+            if (m = "attribution" or m = "surrogateRules") { p = p + 1; }
+            if (m = "nlRationale" or m = "exampleBased")   { p = p - 1; }
+        } else {
+            if (m = "nlRationale" or m = "exampleBased")   { p = p + 1; }
+            if (m = "attribution")                         { p = p - 1; }
+        }
+        if (nm(f.rationalIntuitive) = "intuitive" and m = "exampleBased") { p = p + 1; }
+        if (p >  1) { p =  1.0; }
+        if (p < -1) { p = -1.0; }
+        return p;
+    }
+    if (f.isKindOf(ExplanationPurpose)) {            // Table 2: Method, Content
+        var k = nm(f.kind);
+        if (k = "debug"   and m = "attribution")    { return 1; }
+        if (k = "debug"   and m = "nlRationale")    { return -1; }
+        if (k = "justify" and m = "nlRationale")    { return 1; }
+        if (k = "justify" and m = "attribution")    { return -1; }
+        if (k = "learn"   and m = "exampleBased")   { return 1; }
+        if (k = "contest" and m = "counterfactual") { return 1; }
+        if (k = "contest" and m = "attribution")    { return -1; }
+        if (k = "audit"   and m = "attribution")    { return 1; }
+        return 0;
+    }
+    if (f.isKindOf(Stakes)) {                        // Table 2: Granularity, Method
+        if (m = "counterfactual") { return signOf(f.level); }
+        return 0;
+    }
+    if (f.isKindOf(LearnedTrust)) {                  // Table 2: Salience, Method
+        if (m = "counterfactual" and lvlOf(f.level) = 2) { return 1; }  // cognitive forcing
+        return 0;
+    }
+    return 0;
+}
+
+// ---------- GRANULARITY ----------
+operation pressureOnGranularity(f, v) : Real {
+    var g = nm(v);
+    if (f.isKindOf(DomainExpertise) or f.isKindOf(Stakes)) {   // principal
+        var s = signOf(f.level);
+        if (g = "mechanistic") { return s; }
+        if (g = "headline")    { return 0 - s; }
+        return 0;
+    }
+    if (f.isKindOf(CognitiveLoad)) {                             // principal
+        var s = signOf(f.level);
+        if (g = "headline")    { return s; }
+        if (g = "mechanistic") { return 0 - s; }
+        return 0;
+    }
+    if (f.isKindOf(ExplanationPurpose)) {                        // SECONDARY
+        var k = nm(f.kind);
+        if ((k = "debug" or k = "audit") and g = "mechanistic")   { return 1; }
+        if ((k = "justify" or k = "contest") and g = "factorList") { return 1; }
+        return 0;
+    }
+    return 0;
+}
+
+// ---------- MODALITY ----------
+operation pressureOnModality(f, v) : Real {
+    var md = nm(v);
+    if (f.isKindOf(GraphLiteracy) or f.isKindOf(AIMLLiteracy)) { // principal
+        var s = signOf(f.level);
+        if (md = "visualPlot") { return s; }
+        if (md = "structuredText" or md = "speech") { return 0 - s; }
+        return 0;
+    }
+    if (f.isKindOf(CognitiveStyle)) {                            // principal
+        if (nm(f.visualVerbal) = "visualizer") {
+            if (md = "visualPlot") { return 1; }
+            if (md = "speech")     { return -1; }
+        } else {
+            if (md = "structuredText" or md = "speech") { return 1; }
+            if (md = "visualPlot")                      { return -1; }
+        }
+        return 0;
+    }
+    if (f.isKindOf(CollectiveContext)) {                         // principal
+        if (nm(f.mode) = "conversational" and md = "speech")     { return 1; }
+        if (nm(f.audience) = "group"      and md = "visualPlot") { return 1; }
+        return 0;
+    }
+    return 0;
+}
+
+// ---------- FORMAT : register ----------
+operation pressureOnRegister(f, v) : Real {
+    var r = nm(v);
+    // AI/ML literacy (Table 2 "prefer lay rationale"; invariant 7) and
+    // numeracy (Table 2: Format)
+    if (f.isKindOf(AIMLLiteracy) or f.isKindOf(Numeracy)) {
+        var s = signOf(f.level);
+        if (r = "technical") { return s; }
+        if (r = "lay")       { return 0 - s; }
+        return 0;
+    }
+    return 0;
+}
+
+// ---------- FORMAT : persistent ----------
+operation pressureOnPersistent(f, v) : Real {
+    var p = nm(v);
+    if (f.isKindOf(RegulatoryRegime)) {              // Table 2: durable artifact
+        if (f.documentationDuty) {
+            if (p = "true")  { return 1; }
+            if (p = "false") { return -1; }
+        }
+        return 0;
+    }
+    if (f.isKindOf(ExplanationPurpose)) {
+        if (nm(f.kind) = "audit" and p = "true") { return 1; }
+        return 0;
+    }
+    return 0;
+}
+
+// ---------- LENGTH ----------
+operation pressureOnLength(f, v) : Real {
+    var l = nm(v);
+    if (f.isKindOf(CognitiveLoad) or f.isKindOf(DomainExpertise)) {  // principal
+        var s = signOf(f.level);
+        if (l = "short") { return s; }
+        if (l = "long")  { return 0 - s; }
+        return 0;
+    }
+    if (f.isKindOf(RegulatoryRegime)) {                              // SECONDARY
+        if (f.documentationDuty) {
+            if (l = "long")  { return 1; }
+            if (l = "short") { return -1; }
+        }
+        return 0;
+    }
+    if (f.isKindOf(ExplanationPurpose)) {                            // SECONDARY
+        var k = nm(f.kind);
+        var target = "none";
+        if (k = "debug" or k = "audit") { target = "long"; }
+        if (k = "contest")              { target = "short"; }
+        if (target = "none") { return 0; }
+        if (l = target) { return 1; }
+        return -1;
+    }
+    return 0;
+}
+
+// ---------- scalar dispatcher ----------
+operation pressure(f, prop : String, v) : Real {
+    var p = 0.0;
+    if (prop = "method")      { p = pressureOnMethod(f, v); }
+    if (prop = "granularity") { p = pressureOnGranularity(f, v); }
+    if (prop = "modality")    { p = pressureOnModality(f, v); }
+    if (prop = "register")    { p = pressureOnRegister(f, v); }
+    if (prop = "persistent")  { p = pressureOnPersistent(f, v); }
+    if (prop = "length")      { p = pressureOnLength(f, v); }
+    return p * weightOf(f);
+}
+
+// ================================================================ SETS
+
+// Trust factors are salience-primary in Table 2.  Because salience must
+// be a subset of content (invariant 1), whatever a trust factor asks to
+// foreground it also asks to include.
+operation trustPressure(f, e : String) : Real {
+    if (f.isKindOf(DispositionalTrust)) {
+        if (lvlOf(f.level) = 0 and e = "evidence")    { return 1; }
+        if (lvlOf(f.level) = 2 and e = "uncertainty") { return 1; }
+        return 0;
+    }
+    if (f.isKindOf(SituationalTrust)) {
+        if (lvlOf(f.level) = 0 and (e = "evidence" or e = "uncertainty")) { return 1; }
+        return 0;
+    }
+    if (f.isKindOf(LearnedTrust)) {
+        if (lvlOf(f.level) = 2 and e = "uncertainty") { return 1; }  // over-reliance risk
+        if (lvlOf(f.level) = 0 and e = "evidence")    { return 1; }  // under-reliance risk
+        return 0;
+    }
+    return 0;
+}
+
+// ---------- CONTENT : which elements are included ----------
+operation contentPressure(f, e : String) : Real {
+    if (f.isKindOf(ExplanationPurpose)) {                    // Table 2: Content
+        var k = nm(f.kind);
+        if (k = "debug"   and (e = "fullAttribution" or e = "decisiveFactors"))    { return 1; }
+        if (k = "justify" and (e = "decisiveFactors" or e = "contrastiveReasons")) { return 1; }
+        if (k = "learn"   and e = "evidence")                                      { return 1; }
+        if (k = "contest" and (e = "counterfactuals" or e = "decisiveFactors"))    { return 1; }
+        if (k = "audit"   and (e = "complianceRecord" or e = "fullAttribution"))   { return 1; }
+        return 0;
+    }
+    if (f.isKindOf(TaskRole)) {                              // Table 2: Content
+        if (f.role = "auditor"   and e = "complianceRecord")   { return 1; }
+        if (f.role = "developer" and e = "fullAttribution")    { return 1; }
+        if (f.role = "frontline" and e = "contrastiveReasons") { return 1; }
+        return 0;
+    }
+    if (f.isKindOf(RegulatoryRegime)) {                      // Table 2: Content
+        if (f.documentationDuty and e = "complianceRecord") { return 1; }
+        return 0;
+    }
+    if (f.isKindOf(Numeracy)) {                              // Table 2: Content
+        if (e = "confidenceValues") { return signOf(f.level); }  // no raw rates if low
+        return 0;
+    }
+    return trustPressure(f, e);
+}
+
+// ---------- SALIENCE : which included elements are foregrounded ----------
+operation saliencePressure(f, e : String) : Real {
+    if (f.isKindOf(ExplanationPurpose)) {                    // see README: purpose row
+        var k = nm(f.kind);
+        if (k = "debug"   and e = "decisiveFactors")    { return 1; }
+        if (k = "justify" and e = "contrastiveReasons") { return 1; }
+        if (k = "learn"   and e = "evidence")           { return 1; }
+        if (k = "contest" and e = "counterfactuals")    { return 1; }
+        if (k = "audit"   and e = "complianceRecord")   { return 1; }
+        return 0;
+    }
+    return trustPressure(f, e);
+}
+
+// ================================================================ HARD
+// Values of `prop` a hard-constraint factor forbids (names).
+operation excludedFor(f, prop : String) : Sequence {
+    var out : Sequence;
+    if (f.isKindOf(AccessibilityNeed) and prop = "modality") {
+        for (m in f.excludedModalities) { out.add(nm(m)); }
+    }
+    if (f.isKindOf(SecurityPrivacyConstraint)) {
+        var capRank = rankOf("granularity", nm(f.granularityCap));
+        if (prop = "granularity") {
+            for (g in Sequence{"headline", "factorList", "mechanistic"}) {
+                if (rankOf("granularity", g) > capRank) { out.add(g); }
+            }
+        }
+        // A cap below factor-list level must also withhold the full
+        // attribution vector, or the fidelity limit leaks through content.
+        if (prop = "content" and capRank < rankOf("granularity", "factorList")) {
+            out.add("fullAttribution");
+        }
+    }
+    return out;
+}

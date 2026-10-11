@@ -1,0 +1,60 @@
+// ===================================================================
+//  sensitivity.eol  (v2 -- one-factor-at-a-time)
+//  The paper commits to the SIGNS of the pressures, not their weights.
+//  Scaling ALL pressures by one constant can never change which value
+//  wins, so the meaningful test perturbs ONE factor type at a time:
+//  its weight is set to each value of GRID (0 = ablated) while all
+//  others stay at 1, and every property that changes is reported with
+//  the weight at which it flips.  Decisions that never flip are robust
+//  to the unspecified magnitudes; those that do are what study S1 must
+//  calibrate.
+// ===================================================================
+
+import "engine.eol";
+
+var TOLERANCE : Real = 0.001;
+var WEIGHTS : Map;
+var GRID = Sequence{0.0, 0.5, 2.0, 4.0};
+var KEYS = Sequence{"method", "granularity", "modality", "register",
+                    "persistent", "length", "content", "salience"};
+
+("=".multiply(72)).println();
+("ONE-FACTOR-AT-A-TIME WEIGHT SENSITIVITY   grid: " + GRID.concat(", ")).println();
+("=".multiply(72)).println();
+
+for (r in Recipient.all) {
+    for (ctx in r.contexts) {
+        for (req in ctx.requests) {
+            var F = factorsOf(r, ctx, req);
+            WEIGHTS.clear();
+            var base = deriveAll(F);
+
+            ("").println();
+            ("RECIPIENT: " + r.id + "    REQUEST: " + req.label).println();
+            for (k in KEYS) { ("   baseline " + k.pad(12) + base.get(k)).println(); }
+
+            var types : Sequence;
+            for (f in F) {
+                var n = f.eClass().name;
+                if (not types.includes(n)) { types.add(n); }
+            }
+            var flips = 0;
+            for (t in types) {
+                for (w in GRID) {
+                    WEIGHTS.clear();
+                    WEIGHTS.put(t, w);
+                    var snap = deriveAll(F);
+                    for (k in KEYS) {
+                        if (snap.get(k) <> base.get(k)) {
+                            ("   FLIP " + k.pad(12) + base.get(k) + "  ->  " + snap.get(k)
+                                + "   when w(" + t + ") = " + w).println();
+                            flips = flips + 1;
+                        }
+                    }
+                }
+            }
+            WEIGHTS.clear();
+            if (flips = 0) { ("   all decisions stable under every perturbation").println(); }
+        }
+    }
+}
